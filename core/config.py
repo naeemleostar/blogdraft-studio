@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "BlogDraft Studio"
-APP_VERSION = "3.0"
+APP_VERSION = "3.0.1"
 # Where the app looks for a newer version: a small JSON file {"version": "3.1", "url": "...", "notes": "..."}.
 # Put the address of your own file here (for example a GitHub raw link) before sharing the app.
 UPDATE_URL = ""

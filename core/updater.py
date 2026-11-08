@@ -53,8 +53,8 @@ def research_changes(gemini, post: dict) -> tuple:
 
 
 def suggest_update(writer, post: dict, notes: str) -> dict:
-    data = writer.generate_json(UPDATE_PROMPT.format(content=post.get("content", "")[:40000], notes=notes[:15000]),
-                                temperature=0.3)
+    content = re.sub(r"<!--.*?-->", "", post.get("content", ""), flags=re.S)       # block comments add bulk only
+    data = writer.generate_json(UPDATE_PROMPT.format(content=content[:30000], notes=notes[:12000]), temperature=0.3)
     return data if isinstance(data, dict) else {}
 
 

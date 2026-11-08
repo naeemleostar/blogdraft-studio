@@ -319,3 +319,7 @@ textarea.small-code { height: auto; font-size: 12.5px; }
 .dlg::backdrop { background: rgba(15, 23, 42, .45); }
 .dlg h2 { margin-bottom: 8px; }
 @media (max-width: 1100px) { .update-grid { grid-template-columns: 1fr; } .plan-form .span2 { grid-column: auto; } }
+
+.upd-wait { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.big-spin { width: 28px; height: 28px; border: 3px solid var(--brand); border-right-color: transparent; border-radius: 50%; display: inline-block; animation: spin .8s linear infinite; }
+.upd-log { width: 100%; max-height: 180px; text-align: left; }

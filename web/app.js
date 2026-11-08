@@ -16,7 +16,7 @@ const COUNTRIES = [['US', 'United States'], ['GB', 'United Kingdom'], ['CA', 'Ca
   ['BR', 'Brazil'], ['MX', 'Mexico'], ['JP', 'Japan'], ['KR', 'South Korea'], ['TR', 'Turkey'], ['BD', 'Bangladesh']];
 const IMAGE_SOURCES = { pexels_then_gemini: 'free photo first, then AI', pexels: 'free photos', gemini: 'AI images', openai: 'OpenAI images', none: 'no images' };
 
-const UI_VERSION = '3.0';
+const UI_VERSION = '3.0.1';
 const S = { cfg: {}, niches: [], article: store.get('article', null), trends: [], news: [], newsTopic: '', wpOk: null, planId: '', usage: null, updChecked: false };
 
 /* ------------------------------------------------------------------ API */
@@ -38,6 +38,7 @@ async function runJob(name, body, opts) {
     await new Promise((res) => setTimeout(res, 700));
     const j = await api('job', { id: job });
     if (!opts.quiet) j.logs.slice(seen).forEach((l) => log(l));
+    if (opts.onLog) j.logs.slice(seen).forEach((l) => opts.onLog(l));
     seen = j.logs.length;
     if (j.status === 'done') return j.result;
     if (j.status === 'error') throw new Error(j.error);
@@ -549,11 +550,17 @@ async function searchPosts() {
 
 async function suggestUpdate(row) {
   $$('.post-row').forEach((x) => x.classList.toggle('active', x === row));
-  $('#updateEmpty').innerHTML = '<span class="spin"></span><p>Searching Google for what changed and preparing suggestions (about a minute)…</p>';
-  $('#updateEmpty').classList.remove('hidden');
+  const box = $('#updateEmpty');
+  box.innerHTML = `<div class="upd-wait"><span class="spin big-spin"></span><b>Working on “${esc(row.querySelector('.t').textContent)}”</b>
+    <span class="muted small">Usually 1–3 minutes. Elapsed: <span id="updElapsed">0s</span></span><div class="log upd-log" id="updLog"></div></div>`;
+  box.classList.remove('hidden');
   $('#updateBody').classList.add('hidden');
+  const t0 = Date.now();
+  const timer = setInterval(() => { const el = $('#updElapsed'); if (el) el.textContent = Math.round((Date.now() - t0) / 1000) + 's'; }, 1000);
+  const addLog = (l) => { const lg = $('#updLog'); if (!lg) return; const d = document.createElement('div'); d.textContent = l; lg.appendChild(d); lg.scrollTop = lg.scrollHeight; };
+  $$('.post-row').forEach((x) => x.style.pointerEvents = 'none');
   try {
-    const r = await runJob('update_suggest', { post_id: +row.dataset.pid }, { quiet: true });
+    const r = await runJob('update_suggest', { post_id: +row.dataset.pid }, { quiet: true, onLog: addLog });
     S.upd = r;
     $('#updTitle').textContent = r.post.title;
     $('#updLink').href = r.post.url;
@@ -566,7 +573,10 @@ async function suggestUpdate(row) {
     $('#updateEmpty').classList.add('hidden');
     $('#updateBody').classList.remove('hidden');
   } catch (e) {
-    $('#updateEmpty').innerHTML = `<p>${esc(e.message)}</p>`;
+    box.innerHTML = `<div class="inline-warn red">${esc(e.message)}</div><p class="muted small">If this keeps happening, click <b>Report a problem</b> (bottom left) and send the report.</p>`;
+  } finally {
+    clearInterval(timer);
+    $$('.post-row').forEach((x) => x.style.pointerEvents = '');
   }
 }
 
