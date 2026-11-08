@@ -91,7 +91,8 @@ class PlannerAndSystemTests(unittest.TestCase):
                                        raise_for_status=lambda: None)
             u = system.check_update({"update_url": "https://x/latest.json"})
         self.assertTrue(u["available"])
-        self.assertFalse(system.check_update({"update_url": ""})["configured"])
+        with mock.patch.object(config, "UPDATE_URL", ""):
+            self.assertFalse(system.check_update({"update_url": ""})["configured"])
 
 
 class UpdaterTests(unittest.TestCase):
