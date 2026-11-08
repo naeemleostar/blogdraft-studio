@@ -58,8 +58,9 @@ Open **Setup Guide** in the app (English and Roman Urdu). In short:
 
 - **On a Windows PC:** double-click `build_exe.bat`. It creates `release\BlogDraft-Studio-Windows.zip`
   (the `.exe` + the WordPress plugin + this README). Share that zip.
-- **Or on GitHub (free):** put this folder in a GitHub repository and push a tag such as `v3.0`.
-  `.github/workflows/build-windows.yml` builds the zip and attaches it to the GitHub Release.
+- **Or on GitHub (free):** every push to `main` runs `.github/workflows/build-windows.yml`, which builds the zip
+  and puts it in a GitHub Release named after `APP_VERSION` in `core/config.py` (e.g. `v3.0`). For a new release,
+  raise `APP_VERSION` and push.
 - **Update check:** upload `latest.json` (edit the version and link) somewhere public, for example in your GitHub
   repository, and put its raw link in `core/config.py` → `UPDATE_URL` before building. When you release a new
   version, raise the version in `latest.json`; users then see a "new version" banner.
