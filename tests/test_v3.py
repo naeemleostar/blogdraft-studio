@@ -212,6 +212,7 @@ class ServerV3Tests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.srv.shutdown()
+        cls.srv.server_close()
 
     def api(self, name, body=None):
         import urllib.request

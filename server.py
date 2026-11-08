@@ -785,10 +785,24 @@ class Handler(BaseHTTPRequestHandler):
             self._json(500, {"error": f"{type(e).__name__}: {e}"})
 
 
-def make_server(port: int = 0) -> ThreadingHTTPServer:
-    for p in ([port] if port else [8765, 8766, 8767, 0]):
+class LocalServer(ThreadingHTTPServer):
+    # On Windows SO_REUSEADDR lets a second program bind a port that is already in use, so two copies of the
+    # app would silently share 8765. Never reuse there; elsewhere it only skips the TIME_WAIT delay.
+    allow_reuse_address = os.name != "nt"
+    daemon_threads = True
+
+    def server_bind(self):
+        if os.name == "nt" and hasattr(__import__("socket"), "SO_EXCLUSIVEADDRUSE"):
+            import socket
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
+def make_server(port=None) -> ThreadingHTTPServer:
+    """port=None: the usual ports 8765-8767 (else any free one). port=0: any free port (tests)."""
+    for p in ([port] if port is not None else [8765, 8766, 8767, 0]):
         try:
-            return ThreadingHTTPServer(("127.0.0.1", p), Handler)
+            return LocalServer(("127.0.0.1", p), Handler)
         except OSError:
             continue
     raise SystemExit("Could not start the local server.")

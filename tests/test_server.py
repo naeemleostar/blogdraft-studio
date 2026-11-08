@@ -26,6 +26,7 @@ class ServerTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.srv.shutdown()
+        cls.srv.server_close()
 
     def req(self, path, body=None, token=True, host=None):
         r = urllib.request.Request(f"http://127.0.0.1:{self.port}{path}",
