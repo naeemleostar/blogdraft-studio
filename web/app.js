@@ -16,7 +16,7 @@ const COUNTRIES = [['US', 'United States'], ['GB', 'United Kingdom'], ['CA', 'Ca
   ['BR', 'Brazil'], ['MX', 'Mexico'], ['JP', 'Japan'], ['KR', 'South Korea'], ['TR', 'Turkey'], ['BD', 'Bangladesh']];
 const IMAGE_SOURCES = { pexels_then_gemini: 'free photo first, then AI', pexels: 'free photos', gemini: 'AI images', openai: 'OpenAI images', none: 'no images' };
 
-const UI_VERSION = '3.2';
+const UI_VERSION = '3.3';
 const S = { cfg: {}, niches: [], article: store.get('article', null), trends: [], news: [], newsTopic: '', wpOk: null, planId: '', usage: null, updChecked: false };
 
 /* ------------------------------------------------------------------ API */
@@ -110,6 +110,7 @@ function route() {
   if (page === 'settings') fillSettings();
   if (page === 'calendar') loadPlan();
   if (page === 'wizard') wizardOpen();
+  if (page === 'gsc') loadGsc();
   if (page === 'update' && !$('#postList').children.length) searchPosts();
   if (page === 'guide') { renderGuide(); if (hash !== 'guide') setTimeout(() => { const el = document.getElementById(hash); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 50); }
   window.scrollTo(0, 0);
@@ -729,6 +730,56 @@ async function wizardSave() {
   ['#wz_wp_app_password', '#wz_gemini_api_key', '#wz_pexels_api_key'].forEach((id) => { $(id).value = ''; });
 }
 
+/* ------------------------------------------------------------------ search console */
+const fmt = (n) => Number(n || 0).toLocaleString();
+
+function gscRows(list, kind) {
+  if (!list || !list.length) return '<p class="muted small">Nothing here — good.</p>';
+  return list.map((r, i) => {
+    const label = kind === 'query' ? r.key : r.key.replace(/^https?:\/\/[^/]+/, '') || '/';
+    const meta = `${fmt(r.impressions)} impressions · ${fmt(r.clicks)} clicks · position ${(+r.position).toFixed(1)} · CTR ${(+r.ctr).toFixed(1)}%`;
+    const btns = kind === 'query'
+      ? `<button class="btn small" data-plan="${esc(r.key)}" title="Add to calendar"><i data-icon="calendar"></i></button><button class="btn small primary" data-gq="${i}">Write this</button>`
+      : `<a class="btn small ghost" href="${esc(r.key)}" target="_blank" rel="noopener"><i data-icon="external"></i></a><button class="btn small primary" data-gp="${esc(r.key)}">Update</button>`;
+    return `<div class="list-row"><div class="grow"><div class="t">${esc(label)}</div><div class="meta">${meta}</div></div>${btns}</div>`;
+  }).join('');
+}
+
+function renderGsc(r) {
+  const has = r && r.totals;
+  $('#gscBody').classList.toggle('hidden', !has);
+  if (!has) return;
+  $('#gscClicks').textContent = fmt(r.totals.clicks);
+  $('#gscImpr').textContent = fmt(r.totals.impressions);
+  $('#gscPages').textContent = fmt(r.totals.pages);
+  $('#gscWhen').textContent = r.imported || '';
+  $('#gscAlmost').innerHTML = gscRows(r.almost_page1, 'page');
+  $('#gscCtr').innerHTML = gscRows(r.low_ctr, 'page');
+  $('#gscNew').innerHTML = gscRows(r.new_topics, 'query');
+  $('#gscTop').innerHTML = gscRows(r.top_pages, 'page');
+  const body = $('#gscBody');
+  paintIcons(body);
+  bindPlanButtons(body);
+  $$('[data-gq]', body).forEach((b) => b.addEventListener('click', () => {
+    S.article = null; store.set('article', null); showArticle();
+    useTopic(r.new_topics[+b.dataset.gq].key, '', []);
+  }));
+  $$('[data-gp]', body).forEach((b) => b.addEventListener('click', () => {
+    const slug = b.dataset.gp.replace(/^https?:\/\/[^/]+/, '').split('/').filter(Boolean).pop() || '';
+    location.hash = '#update';
+    $('#postSearch').value = slug.replace(/-/g, ' ');
+    searchPosts();
+  }));
+}
+
+async function loadGsc() {
+  try { renderGsc(await api('gsc', {})); } catch (e) { /* nothing imported yet */ }
+}
+
+function readFileAsDataUrl(f) {
+  return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(f); });
+}
+
 /* ------------------------------------------------------------------ guide */
 function renderGuide() {
   const lang = store.get('lang', 'en');
@@ -1078,6 +1129,40 @@ function wire() {
     } catch (err) { $('#wzPxRes').innerHTML = `<span class="status" style="color:var(--red)">✗ ${esc(err.message)}</span>`; }
   }));
   $$('#uiLangSeg button').forEach((b) => b.addEventListener('click', () => setUiLang(b.dataset.lang)));
+
+  // search console
+  $('#gscFile').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const r = await api('gsc', { data: await readFileAsDataUrl(f), name: f.name });
+      renderGsc(r);
+      toast('Search Console data loaded');
+    } catch (err) { toast(err.message, 'err'); }
+  });
+
+  // backup
+  $('#exportBtn').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    const r = await api('export', { include_keys: $('#exportKeys').checked });
+    const bin = Uint8Array.from(atob(r.data), (c) => c.charCodeAt(0));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bin], { type: 'application/zip' }));
+    a.download = r.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('Backup downloaded');
+  }));
+  $('#importFile').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f || !confirm('Restore this backup? Your current settings will be replaced.')) return;
+    try {
+      const st = await api('import', { data: await readFileAsDataUrl(f) });
+      S.cfg = st.config;
+      await loadState(); fillSettings(); updatePill();
+      toast(`Backup restored (${st.restored} files)`);
+    } catch (err) { toast(err.message, 'err'); }
+  });
 
   // guide + quit
   $$('#langSeg button').forEach((b) => b.addEventListener('click', () => { store.set('lang', b.dataset.lang); renderGuide(); }));

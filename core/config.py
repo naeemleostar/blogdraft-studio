@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "BlogDraft Studio"
-APP_VERSION = "3.2"
+APP_VERSION = "3.3"
 # Where the app looks for a newer version: a small JSON file {"version": "3.1", "url": "...", "notes": "..."}.
 # Put the address of your own file here (for example a GitHub raw link) before sharing the app.
 GITHUB_REPO = "naeemleostar/blogdraft-studio"
@@ -70,6 +70,8 @@ PROFILE_DEFAULTS = {
     "experience_section": True,
     "max_internal_links": 4,
     "max_external_links": 4,
+    "compress_images": True,    # WebP, max 1600 px wide, for a faster site
+    "faq_schema": False,        # add FAQPage structured data (needs an admin WordPress user)
 }
 
 DEFAULTS = {**GLOBAL_DEFAULTS, **PROFILE_DEFAULTS}

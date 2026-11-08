@@ -112,7 +112,13 @@ const UR = {
   'Close': 'Band karein', 'Copy report': 'Report copy karein', 'Copy & open bug form on GitHub': 'Copy karke GitHub par form kholein',
   'Copied': 'Copy ho gaya', 'Draft ready — review it': 'Draft tayyar — check karein', 'Outline ready': 'Outline tayyar', 'Draft saved in WordPress': 'WordPress mein draft save ho gaya',
   'Saved on this computer': 'Computer par save ho gaya', 'Checked': 'Check ho gaya', 'Added to calendar': 'Calendar mein add ho gaya', 'Post updated': 'Post update ho gayi',
-  'Enter a topic first': 'Pehle topic likhein',
+  'Enter a topic first': 'Pehle topic likhein', 'Search Console': 'Search Console', 'Open Search Console export': 'Search Console ki file kholein',
+  'How to get the file (1 minute)': 'File kaise milegi (1 minute)', 'Clicks': 'Clicks', 'Impressions': 'Impressions', 'Pages in Google': 'Google mein pages', 'Imported': 'Kab load hui',
+  'Almost on page 1 — update these first': 'Page 1 ke qareeb — pehle inhein update karein', 'Seen but rarely clicked — improve title & description': 'Dikhti hain magar click kam — title aur description behtar karein',
+  'People search this — you have no post yet': 'Log ye search karte hain — aap ki post abhi nahi', 'Your best pages': 'Aap ke behtareen pages', 'Update': 'Update',
+  '5. Backup': '5. Backup', 'Download backup': 'Backup download karein', 'Restore from backup': 'Backup se wapas laayein',
+  'Make images light (WebP) for a faster site': 'Tasveerein halki karein (WebP), site tez hogi', 'Add FAQ schema (structured data)': 'FAQ schema add karein (structured data)',
+  'Backup downloaded': 'Backup download ho gaya', 'Search Console data loaded': 'Search Console data load ho gaya', 'Nothing here — good.': 'Yahan kuch nahi — achha hai.',
 };
 
 const UI_LANG = (() => { try { return JSON.parse(localStorage.getItem('bds_uiLang')) || 'en'; } catch (e) { return 'en'; } })();

@@ -27,6 +27,7 @@
       <a href="#drafts" data-page="drafts"><i data-icon="folder"></i>My Drafts</a>
       <a href="#calendar" data-page="calendar"><i data-icon="calendar"></i>Calendar</a>
       <a href="#update" data-page="update"><i data-icon="refresh"></i>Update Old Posts</a>
+      <a href="#gsc" data-page="gsc"><i data-icon="trend"></i>Search Console</a>
       <div class="nav-sep"></div>
       <a href="#settings" data-page="settings"><i data-icon="sliders"></i>Settings</a>
       <a href="#guide" data-page="guide"><i data-icon="book"></i>Setup Guide</a>
@@ -391,6 +392,41 @@
       </div>
     </section>
 
+    <!-- ============================== SEARCH CONSOLE -->
+    <section class="page" id="page-gsc">
+      <header class="page-head">
+        <div><h1>Search Console</h1><p class="muted">See which posts Google shows, which almost reach page 1, and what people search that you haven't written yet.</p></div>
+        <label class="btn primary"><i data-icon="upload"></i>Open Search Console export<input type="file" id="gscFile" accept=".zip,.csv" hidden></label>
+      </header>
+      <div class="card" id="gscHow">
+        <h2><i data-icon="info"></i>How to get the file (1 minute)</h2>
+        <ol class="wz-how">
+          <li>Open <a class="link" href="https://search.google.com/search-console" target="_blank" rel="noopener">search.google.com/search-console</a> and choose your site.</li>
+          <li>Click <b>Performance</b> (Search results). Set the date to <b>Last 3 months</b>.</li>
+          <li>Top right: <b>Export</b> → <b>Download CSV</b>. A zip file is saved.</li>
+          <li>Click <b>Open Search Console export</b> above and choose that zip. Nothing is uploaded anywhere; it stays on this computer.</li>
+        </ol>
+      </div>
+      <div id="gscBody" class="hidden">
+        <div class="grid stats">
+          <div class="card stat"><div class="stat-icon blue"><i data-icon="send"></i></div><div><div class="stat-num" id="gscClicks">–</div><div class="stat-label">Clicks</div></div></div>
+          <div class="card stat"><div class="stat-icon violet"><i data-icon="search"></i></div><div><div class="stat-num" id="gscImpr">–</div><div class="stat-label">Impressions</div></div></div>
+          <div class="card stat"><div class="stat-icon green"><i data-icon="file"></i></div><div><div class="stat-num" id="gscPages">–</div><div class="stat-label">Pages in Google</div></div></div>
+          <div class="card stat"><div class="stat-icon amber"><i data-icon="calendar"></i></div><div><div class="stat-num text" id="gscWhen">–</div><div class="stat-label">Imported</div></div></div>
+        </div>
+        <div class="card"><div class="card-head"><h2><i data-icon="trend"></i>Almost on page 1 — update these first</h2></div>
+          <p class="muted small">Google shows these at position 8–20. A good update (fresh facts, your experience, better headings) can move them to page 1.</p>
+          <div id="gscAlmost" class="list"></div></div>
+        <div class="card"><div class="card-head"><h2><i data-icon="target"></i>Seen but rarely clicked — improve title & description</h2></div>
+          <p class="muted small">These appear on page 1 but under 2% of people click. A clearer SEO title and meta description usually helps.</p>
+          <div id="gscCtr" class="list"></div></div>
+        <div class="card"><div class="card-head"><h2><i data-icon="sparkles"></i>People search this — you have no post yet</h2></div>
+          <div id="gscNew" class="list"></div></div>
+        <div class="card"><div class="card-head"><h2><i data-icon="check"></i>Your best pages</h2></div>
+          <div id="gscTop" class="list"></div></div>
+      </div>
+    </section>
+
     <!-- ============================== SETTINGS -->
     <section class="page" id="page-settings">
       <header class="page-head">
@@ -458,7 +494,10 @@
           <label class="switch"><input type="checkbox" data-k="faq"><span></span>FAQ section</label>
           <label class="switch"><input type="checkbox" data-k="sources_section"><span></span>Sources list at the end</label>
           <label class="switch"><input type="checkbox" data-k="experience_section"><span></span>Space for my own experience</label>
+          <label class="switch"><input type="checkbox" data-k="compress_images"><span></span>Make images light (WebP) for a faster site</label>
+          <label class="switch"><input type="checkbox" data-k="faq_schema"><span></span>Add FAQ schema (structured data)</label>
         </div>
+        <p class="muted small">FAQ schema needs an Administrator WordPress user. Google now shows FAQ rich results only for some sites, so treat it as a small extra.</p>
       </div>
 
       <div class="card">
@@ -519,6 +558,16 @@
         </div>
         <div class="row gap mt wrap"><label class="switch"><input type="checkbox" data-k="check_updates"><span></span>Check for new versions when the app starts</label>
           <button class="btn small" id="checkUpdBtn"><i data-icon="refresh"></i>Check now</button><span class="muted small" id="updResult"></span></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="save"></i>5. Backup</h2></div>
+        <p class="muted small">Save your settings, drafts, photos and plans in one file, for a new computer or just to be safe.</p>
+        <div class="row gap wrap">
+          <button class="btn" id="exportBtn"><i data-icon="save"></i>Download backup</button>
+          <label class="switch"><input type="checkbox" id="exportKeys"><span></span>Include API keys and passwords (keep that file private)</label>
+        </div>
+        <div class="row gap mt"><label class="btn"><i data-icon="upload"></i>Restore from backup<input type="file" id="importFile" accept=".zip" hidden></label>
+          <span class="muted small">Restoring replaces your settings with the ones in the backup.</span></div>
       </div>
       <div class="row end"><button class="btn primary big" id="saveSettingsBtn2"><i data-icon="save"></i>Save settings</button></div>
     </section>

@@ -1,5 +1,7 @@
 """BlogDraft Studio: a local web dashboard (runs only on this computer, at http://127.0.0.1)."""
 import base64
+import io
+import zipfile
 import html
 import json
 import mimetypes
@@ -17,7 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from core import config, news, niches, planner, system, topics, updater
+from core import config, gsc, news, niches, planner, system, topics, updater
 from core.gemini import Gemini
 from core.llm import AnthropicWriter, OpenAIWriter, make_writer, pick_anthropic, pick_openai
 from core.images import pexels_search
@@ -579,6 +581,97 @@ def api_plan(body):
             "posts_per_week": cfg().get("posts_per_week", 3)}
 
 
+def api_gsc(body):
+    prof = STATE["cfg"]["profile"]
+    if body.get("data"):
+        try:
+            raw = base64.b64decode(str(body["data"]).split(",", 1)[-1])
+            if len(raw) > 30 * 1024 * 1024:
+                raise UserError("File is too large.")
+            result = gsc.recommend(gsc.parse_export(raw, body.get("name", "")))
+        except (ValueError, zipfile.BadZipFile) as e:
+            raise UserError(str(e) or "Could not read this file.")
+        result["imported"] = time.strftime("%Y-%m-%d %H:%M")
+        result["file"] = os.path.basename(body.get("name", ""))[:80]
+        gsc.save(prof, result)
+        return result
+    return gsc.load(prof)
+
+
+BACKUP_FILES = ("plan.json", "usage.json")
+
+
+def api_export(body):
+    """A zip with settings, drafts, photos, plans and usage. Keys only if the user asks for them."""
+    buf = io.BytesIO()
+    raw = config._normalise(config._read_raw())
+    if not body.get("include_keys"):
+        raw = json.loads(json.dumps(raw))
+        for k in config.SECRETS:
+            raw["global"].pop(k, None)
+            for p in raw["profiles"].values():
+                p.pop(k, None)
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("config.json", json.dumps(raw, indent=2))
+        for name in BACKUP_FILES:
+            f = config.CONFIG_DIR / name
+            if f.is_file():
+                z.write(f, name)
+        for f in config.CONFIG_DIR.glob("gsc-*.json"):
+            z.write(f, f.name)
+        for folder, arc in ((config.DRAFTS_DIR, "drafts"), (config.MEDIA_DIR, "media")):
+            if folder.is_dir():
+                for f in folder.iterdir():
+                    if f.is_file():
+                        z.write(f, f"{arc}/{f.name}")
+    name = f"blogdraft-backup-{time.strftime('%Y-%m-%d')}.zip"
+    return {"name": name, "data": base64.b64encode(buf.getvalue()).decode()}
+
+
+def api_import(body):
+    try:
+        raw = base64.b64decode(str(body.get("data", "")).split(",", 1)[-1])
+        z = zipfile.ZipFile(io.BytesIO(raw))
+    except (ValueError, zipfile.BadZipFile):
+        raise UserError("This is not a BlogDraft Studio backup zip.")
+    names = z.namelist()
+    if "config.json" not in names:
+        raise UserError("This is not a BlogDraft Studio backup zip.")
+    try:
+        incoming = json.loads(z.read("config.json"))
+    except ValueError:
+        raise UserError("The backup's settings file is damaged.")
+    current = config._normalise(config._read_raw())
+    incoming = config._normalise(incoming)
+    # keep keys you already have when the backup was made without them
+    for k in config.SECRETS:
+        if not incoming["global"].get(k) and current["global"].get(k):
+            incoming["global"][k] = current["global"][k]
+        for pname, prof in incoming["profiles"].items():
+            if not prof.get(k) and current["profiles"].get(pname, {}).get(k):
+                prof[k] = current["profiles"][pname][k]
+    config._write_raw(incoming)
+    restored = 0
+    for n in names:
+        base = os.path.basename(n)
+        if not base or base != n.split("/")[-1] or ".." in n:
+            continue
+        if n.startswith("drafts/") and base.endswith(".json"):
+            dest = config.DRAFTS_DIR / base
+        elif n.startswith("media/") and os.path.splitext(base)[1].lower() in IMAGE_TYPES.values():
+            dest = config.MEDIA_DIR / base
+        elif n in BACKUP_FILES or (n.startswith("gsc-") and n.endswith(".json") and "/" not in n):
+            dest = config.CONFIG_DIR / base
+        else:
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(z.read(n))
+        restored += 1
+    st = _reload(config.load())
+    st["restored"] = restored
+    return st
+
+
 def api_report(_body):
     return {"text": system.problem_report(cfg(), JOBS), "version": config.APP_VERSION,
             "issue_url": f"https://github.com/{config.GITHUB_REPO}/issues/new?template=bug_report.yml"
@@ -713,6 +806,9 @@ ROUTES = {
     "upload_image": api_upload_image,
     "plan": api_plan,
     "report": api_report,
+    "gsc": api_gsc,
+    "export": api_export,
+    "import": api_import,
     "seo": api_seo,
     "factcheck": start("Fact-check", job_factcheck),
     "social": start("Social posts", job_social),

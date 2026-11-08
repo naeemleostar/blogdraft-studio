@@ -63,6 +63,13 @@ Open **Setup Guide** in the app (English and Roman Urdu). In short:
 - **OpenAI or Claude** can write the article (research stays on Gemini + Google Search). OpenAI images optional.
 - **AI usage / cost estimate** on the Dashboard, **update check**, and **Report a problem** (keys removed).
 
+## New in 3.1 – 3.3
+
+- **Setup wizard** for first-time users, **app in Roman Urdu** (Settings → App language), **Saver mode** for the free Gemini plan, clearer error messages.
+- **Search Console**: open the Performance export zip to see posts almost on page 1, posts with low clicks, and searches you have no post for.
+- **Lighter images** (WebP, max 1600 px), optional **FAQ schema**, **backup & restore** (Settings → Backup).
+- Folder build (fewer antivirus warnings), MIT license, GitHub bug-report form.
+
 ## Make the .exe (so your viewers don't need Python)
 
 - **On a Windows PC:** double-click `build_exe.bat`. It creates `release\BlogDraft-Studio-Windows.zip`

@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from . import config, niches
 from .gemini import Gemini, resolve_url
 from .llm import make_writer
+from .media import compress, faq_schema
 from .images import pexels_search, download
 
 # ----------------------------------------------------------------------------- prompts
@@ -607,9 +608,27 @@ class Pipeline:
         return None
 
     def final_html(self, a: Article, figures: list, used_ai: bool) -> str:
-        return build_final_html(a, figures, used_ai, sources=self.cfg.get("sources_section", True),
-                                disclaimer=YMYL_DISCLAIMER if self.ymyl else "",
-                                ai_caption=self.cfg.get("ai_caption") or "AI-generated image")
+        out = build_final_html(a, figures, used_ai, sources=self.cfg.get("sources_section", True),
+                               disclaimer=YMYL_DISCLAIMER if self.ymyl else "",
+                               ai_caption=self.cfg.get("ai_caption") or "AI-generated image")
+        if self.cfg.get("faq_schema"):
+            schema = faq_schema(a.body_html)
+            if schema:
+                out += "\n" + schema
+        return out
+
+    def _upload(self, wp, data: bytes, mime: str, name: str, alt: str, caption: str, title: str) -> dict:
+        """Upload an image, made lighter first (WebP) when that is switched on."""
+        if self.cfg.get("compress_images", True):
+            small, small_mime = compress(data, mime)
+            if small_mime != mime:
+                try:
+                    m = wp.upload_image(small, small_mime, name, alt, caption, title)
+                    self.log(f"Image saved as WebP ({len(data) // 1024} KB → {len(small) // 1024} KB).")
+                    return m
+                except Exception as e:  # noqa: BLE001 - some hosts block WebP: fall back to the original
+                    self.log(f"WebP upload not accepted ({str(e)[:80]}); uploading the original.")
+        return wp.upload_image(data, mime, name, alt, caption, title)
 
     def publish_draft(self, a: Article, wp) -> dict:
         source = self.cfg.get("image_source", "gemini")
@@ -626,7 +645,7 @@ class Pipeline:
             mime = mimetypes.guess_type(str(path))[0] or "image/jpeg"
             alt = img.get("alt") or a.title
             cap = html.escape(img.get("caption") or "")
-            m = wp.upload_image(path.read_bytes(), mime, f"{a.slug}-own-{i}", alt, cap, a.title)
+            m = self._upload(wp, path.read_bytes(), mime, f"{a.slug}-own-{i}", alt, cap, a.title)
             if img.get("featured") and not featured_id:
                 featured_id = m["id"]
             else:
@@ -644,8 +663,8 @@ class Pipeline:
                 if got:
                     data, mime, cap, is_ai = got
                     used_ai |= is_ai
-                    m = wp.upload_image(data, mime, a.slug + "-featured", a.featured_image.get("alt") or a.title,
-                                        cap, a.title)
+                    m = self._upload(wp, data, mime, a.slug + "-featured", a.featured_image.get("alt") or a.title,
+                                     cap, a.title)
                     featured_id = m["id"]
             except Exception as e:  # noqa: BLE001
                 self.log(f"Featured image skipped: {e}")
@@ -657,7 +676,7 @@ class Pipeline:
                     continue
                 data, mime, cap, is_ai = got
                 used_ai |= is_ai
-                m = wp.upload_image(data, mime, f"{a.slug}-{i}", spec.get("alt") or a.title, cap, a.title)
+                m = self._upload(wp, data, mime, f"{a.slug}-{i}", spec.get("alt") or a.title, cap, a.title)
                 figures.append((int(spec.get("after_h2") or i), figure_html(m["url"], spec.get("alt") or a.title, cap)))
             except Exception as e:  # noqa: BLE001
                 self.log(f"Image {i} skipped: {e}")
