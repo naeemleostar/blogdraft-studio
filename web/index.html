@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BlogDraft Studio</title>
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css">
+<meta name="app-token" content="__TOKEN__">
+</head>
+<body>
+<div class="shell">
+  <!-- ============================== SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/static/icon.svg" alt="" width="34" height="34">
+      <div><div class="brand-name">BlogDraft</div><div class="brand-sub">Studio</div></div>
+    </div>
+    <div class="site-switch">
+      <label for="siteSel">Site</label>
+      <div class="row gap"><select id="siteSel"></select><button class="btn small ghost" id="addSiteBtn" title="Add another site"><i data-icon="plus"></i></button></div>
+    </div>
+    <nav>
+      <a href="#dashboard" data-page="dashboard"><i data-icon="grid"></i>Dashboard</a>
+      <a href="#topics" data-page="topics"><i data-icon="search"></i>Find Topics</a>
+      <a href="#write" data-page="write"><i data-icon="pen"></i>Write Post</a>
+      <a href="#drafts" data-page="drafts"><i data-icon="folder"></i>My Drafts</a>
+      <a href="#calendar" data-page="calendar"><i data-icon="calendar"></i>Calendar</a>
+      <a href="#update" data-page="update"><i data-icon="refresh"></i>Update Old Posts</a>
+      <div class="nav-sep"></div>
+      <a href="#settings" data-page="settings"><i data-icon="sliders"></i>Settings</a>
+      <a href="#guide" data-page="guide"><i data-icon="book"></i>Setup Guide</a>
+    </nav>
+    <div class="side-foot">
+      <div class="site-pill" id="sitePill"><span class="dot"></span><span id="sitePillText">Not connected</span></div>
+      <button class="btn ghost small" id="reportBtn"><i data-icon="alert"></i>Report a problem</button>
+      <button class="btn ghost small" id="quitBtn"><i data-icon="power"></i>Quit app</button>
+      <div class="ver" id="verText"></div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- ============================== DASHBOARD -->
+    <section class="page" id="page-dashboard">
+      <header class="page-head">
+        <div><h1>Welcome back</h1><p class="muted">Find a topic, write a researched draft, check it, save it to WordPress.</p></div>
+        <a class="btn primary" href="#write"><i data-icon="pen"></i>Write a post</a>
+      </header>
+
+      <div id="updateBanner" class="update-banner hidden"></div>
+      <div class="grid stats">
+        <div class="card stat"><div class="stat-icon blue"><i data-icon="send"></i></div><div><div class="stat-num" id="statWeek">–</div><div class="stat-label">Posts published (last 7 days)</div></div></div>
+        <div class="card stat"><div class="stat-icon amber"><i data-icon="file"></i></div><div><div class="stat-num" id="statWpDrafts">–</div><div class="stat-label">Drafts waiting in WordPress</div></div></div>
+        <div class="card stat"><div class="stat-icon green"><i data-icon="folder"></i></div><div><div class="stat-num" id="statLocal">–</div><div class="stat-label">Drafts saved on this computer</div></div></div>
+        <div class="card stat"><div class="stat-icon violet"><i data-icon="coins"></i></div><div><div class="stat-num" id="statCost">–</div><div class="stat-label" id="statCostLabel">AI use this month</div></div></div>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <div class="card-head"><h2>Setup checklist</h2><a href="#guide" class="link">Setup guide →</a></div>
+          <ul class="checklist" id="checklist"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Posting pace</h2></div>
+          <div id="paceBox" class="pace"></div>
+          <ul class="tips">
+            <li><b>2–3 good posts a week</b> beats 10 rushed ones. Google treats mass AI posting as spam.</li>
+            <li>Add <b>your own experience</b>, screenshots or photos to every post.</li>
+            <li>Stay in <b>your niche</b>. Off-topic trending posts hurt AdSense approval.</li>
+            <li>Always <b>read the draft</b> and check facts against the Sources list before publishing.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <div class="card-head"><h2><i data-icon="calendar"></i>This week's plan</h2><a href="#calendar" class="link">Calendar →</a></div>
+          <div id="weekPlan" class="list"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Recent drafts</h2><a href="#drafts" class="link">All drafts →</a></div>
+          <div id="recentDrafts" class="list"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="target"></i>Your niche</h2><a href="#settings" class="link">Change →</a></div>
+        <div id="statNiche" class="muted"></div>
+      </div>
+    </section>
+
+    <!-- ============================== TOPICS -->
+    <section class="page" id="page-topics">
+      <header class="page-head">
+        <div><h1>Find Topics</h1><p class="muted">Today's Google trends and search ideas, filtered to your niche.</p></div>
+      </header>
+
+      <div class="card">
+        <div class="card-head"><h2>Your niche</h2><span class="muted small">Tick one or more. Results are filtered to these.</span></div>
+        <div class="chips" id="topicNiches"></div>
+      </div>
+
+      <div class="grid topics-grid">
+        <div class="card">
+          <div class="card-head">
+            <h2><i data-icon="trend"></i>What's hot</h2>
+            <select id="geoSel" title="Country"></select>
+          </div>
+          <div class="row gap wrap">
+            <button class="btn primary" id="hotBtn"><i data-icon="sparkles"></i>Hot in my niche</button>
+            <button class="btn" id="trendsBtn"><i data-icon="trend"></i>Top Google searches</button>
+            <a class="btn ghost" id="trendsLink" target="_blank" rel="noopener"><i data-icon="external"></i>Open Google Trends</a>
+          </div>
+          <p class="muted small" id="sourceNote">"Hot in my niche" shows the most-covered stories in your niche and country (Google News).
+            "Top Google searches" shows the country's latest trending searches (Google Trends gives only about 10, mostly sports or news).</p>
+          <div class="row between small muted toolbar">
+            <label class="switch" id="onlyNicheWrap"><input type="checkbox" id="onlyNiche" checked><span></span>Only my niche</label>
+            <span id="trendSummary"></span>
+          </div>
+          <div id="trendList" class="trend-list"><div class="empty"><i data-icon="trend"></i><p>Click <b>Hot in my niche</b> to see what is being talked about in your niche right now.</p></div></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs" id="ideaTabs">
+            <button class="tab active" data-tab="ai">AI ideas</button>
+            <button class="tab" data-tab="kw">Keyword ideas</button>
+          </div>
+          <div class="tab-pane" data-pane="ai">
+            <p class="muted small">Gemini picks topics that fit your niche. Trend ideas are timely; evergreen ideas get searched all year.</p>
+            <div class="row gap wrap">
+              <button class="btn" id="ideasTrendsBtn"><i data-icon="sparkles"></i>From today's trends</button>
+              <button class="btn" id="ideasEverBtn"><i data-icon="leaf"></i>Evergreen ideas</button>
+            </div>
+            <input id="everKw" placeholder="Optional focus for evergreen ideas, e.g. budget phones" class="mt">
+          </div>
+          <div class="tab-pane hidden" data-pane="kw">
+            <p class="muted small">What people actually type into Google after your keyword.</p>
+            <div class="row gap"><input id="kwInput" placeholder="e.g. iphone battery"><button class="btn" id="kwBtn"><i data-icon="search"></i>Search</button></div>
+          </div>
+          <div id="ideaList" class="idea-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== WRITE -->
+    <section class="page" id="page-write">
+      <header class="page-head">
+        <div><h1>Write Post</h1><p class="muted">Research on Google, write, check, then save as a <b>Draft</b>. You publish it yourself.</p></div>
+        <div class="row gap"><button class="btn ghost" id="newArticleBtn"><i data-icon="plus"></i>New</button></div>
+      </header>
+
+      <div class="steps" id="writeSteps">
+        <div class="step" data-step="1"><span>1</span>Topic</div>
+        <div class="step" data-step="2"><span>2</span>Outline</div>
+        <div class="step" data-step="3"><span>3</span>Write</div>
+        <div class="step" data-step="4"><span>4</span>Review & edit</div>
+        <div class="step" data-step="5"><span>5</span>Save draft</div>
+      </div>
+
+      <div class="grid write-grid">
+        <div class="col">
+          <div class="card">
+            <label class="lbl">Topic</label>
+            <input id="topicInput" placeholder="What should the article be about?">
+            <div id="topicWarn" class="inline-warn hidden"></div>
+            <label class="lbl">Angle <span class="muted">(optional)</span></label>
+            <input id="angleInput" placeholder="e.g. what it means for everyday users">
+            <div id="newsBox" class="news-box hidden"></div>
+            <label class="lbl">Your own experience <span class="muted">(any language, a few lines)</span></label>
+            <textarea id="expInput" rows="3" placeholder="What did YOU do, see or learn about this? The app turns it into a short first-person section and adds nothing new."></textarea>
+            <div class="row gap mt wrap">
+              <button class="btn primary big" id="outlineBtn"><i data-icon="list"></i>Research & make outline</button>
+              <button class="btn" id="writeBtn"><i data-icon="sparkles"></i>Skip outline, write now</button>
+            </div>
+            <p class="muted small">The outline lets you change the sections and add your own points before the full article is written.</p>
+          </div>
+
+          <div class="card hidden" id="outlineCard">
+            <div class="card-head"><h2><i data-icon="list"></i>Outline</h2><span class="muted small">Edit freely: <code>## heading</code> and <code>- point</code> lines</span></div>
+            <textarea id="outlineInput" rows="14" class="code small-code" spellcheck="false"></textarea>
+            <div class="row gap mt"><button class="btn primary big" id="fromOutlineBtn"><i data-icon="sparkles"></i>Write from this outline</button><span class="muted small">Takes about a minute.</span></div>
+          </div>
+
+          <div class="card" id="imagesCard">
+            <div class="card-head"><h2><i data-icon="image"></i>Your photos & screenshots</h2>
+              <label class="btn small"><i data-icon="upload"></i>Add images<input type="file" id="imgFiles" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden></label></div>
+            <p class="muted small">Your own pictures make a post trustworthy and help with AdSense. They are uploaded with the draft, before any stock or AI images.</p>
+            <div id="ownImages" class="own-images"></div>
+          </div>
+
+          <div class="card hidden" id="seoCard">
+            <div class="card-head"><h2><i data-icon="target"></i>SEO</h2><span class="badge" id="seoScore"></span></div>
+            <label class="lbl">Title</label><input id="f_title">
+            <label class="lbl">SEO title <span class="count" id="c_seo"></span></label><input id="f_seo_title">
+            <div class="row gap">
+              <div class="grow"><label class="lbl">Slug</label><input id="f_slug"></div>
+              <div class="grow"><label class="lbl">Focus keyword</label><input id="f_focus_keyword"></div>
+            </div>
+            <label class="lbl">Meta description <span class="count" id="c_meta"></span></label><textarea id="f_meta_description" rows="3"></textarea>
+            <div class="row gap">
+              <div class="grow"><label class="lbl">Category</label><input id="f_category"></div>
+              <div class="grow"><label class="lbl">Tags <span class="muted">(comma separated)</span></label><input id="f_tags"></div>
+            </div>
+            <div class="serp" id="serp"></div>
+          </div>
+
+          <div class="card hidden" id="checksCard">
+            <div class="card-head"><h2><i data-icon="shield"></i>Checks</h2>
+              <div class="row gap"><button class="btn small" id="factBtn"><i data-icon="search"></i>Fact-check</button><button class="btn small" id="recheckBtn"><i data-icon="refresh"></i>Re-check</button></div></div>
+            <ul id="checkList" class="checks"></ul>
+            <div id="factBox" class="hidden"><h3 class="sub">Fact-check</h3><ul id="factList" class="checks"></ul></div>
+            <h3 class="sub">Readability & SEO</h3>
+            <table class="seo-table" id="seoReport"></table>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card hidden" id="bodyCard">
+            <div class="card-head">
+              <div class="tabs" id="bodyTabs">
+                <button class="tab active" data-tab="preview">Preview</button>
+                <button class="tab" data-tab="html">Edit HTML</button>
+                <button class="tab" data-tab="sources">Sources</button>
+                <button class="tab" data-tab="social">Social</button>
+              </div>
+              <span class="muted small" id="wordCount"></span>
+            </div>
+            <div class="tab-pane" data-pane="preview"><iframe id="previewFrame" sandbox="" title="Article preview"></iframe></div>
+            <div class="tab-pane hidden" data-pane="html"><textarea id="f_body_html" class="code" spellcheck="false"></textarea></div>
+            <div class="tab-pane hidden" data-pane="sources"><ol id="sourceList" class="sources"></ol></div>
+            <div class="tab-pane hidden" data-pane="social">
+              <div class="row gap"><input id="socialUrl" placeholder="Post link (after you publish), e.g. https://yourblog.com/post-slug/"><button class="btn" id="socialBtn"><i data-icon="sparkles"></i>Write social posts</button></div>
+              <div id="socialBox" class="social-box"></div>
+            </div>
+            <div class="row gap wrap actions">
+              <button class="btn" id="saveLocalBtn"><i data-icon="save"></i>Save on computer</button>
+              <button class="btn primary big" id="publishBtn"><i data-icon="upload"></i>Add images & save Draft in WordPress</button>
+              <a class="btn ghost hidden" id="openWpBtn" target="_blank" rel="noopener"><i data-icon="external"></i>Open draft in WordPress</a>
+            </div>
+          </div>
+
+          <div class="card hidden" id="linksCard">
+            <div class="card-head"><h2><i data-icon="link"></i>Links from your older posts</h2></div>
+            <p class="muted small">After you publish this post, paste its link and the app finds older posts where a link to it fits naturally. You approve each one.</p>
+            <div class="row gap"><input id="linkUrl" placeholder="https://yourblog.com/new-post/"><button class="btn" id="linkBtn"><i data-icon="search"></i>Find places</button></div>
+            <div id="linkList" class="list"></div>
+          </div>
+
+          <div class="card" id="logCard">
+            <div class="card-head"><h2><i data-icon="activity"></i>Activity</h2><button class="btn small ghost" id="clearLogBtn">Clear</button></div>
+            <div id="log" class="log"><div class="muted small">Progress shows here.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== DRAFTS -->
+    <section class="page" id="page-drafts">
+      <header class="page-head">
+        <div><h1>My Drafts</h1><p class="muted">Every article is saved on this computer automatically.</p></div>
+      </header>
+      <div class="card"><div id="draftList" class="list"></div></div>
+    </section>
+
+    <!-- ============================== CALENDAR -->
+    <section class="page" id="page-calendar">
+      <header class="page-head">
+        <div><h1>Content Calendar</h1><p class="muted">Plan your posts. Steady posting beats bursts.</p></div>
+        <span class="badge brand" id="paceBadge"></span>
+      </header>
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="plus"></i>Plan a post</h2></div>
+        <div class="form-grid plan-form">
+          <div><label class="lbl">Date</label><input type="date" id="planDate"></div>
+          <div class="span2"><label class="lbl">Topic</label><input id="planTopic" placeholder="What will you write about?"></div>
+          <div><label class="lbl">Angle <span class="muted">(optional)</span></label><input id="planAngle"></div>
+        </div>
+        <div class="row gap mt wrap"><button class="btn primary" id="planAddBtn"><i data-icon="plus"></i>Add to calendar</button>
+          <span class="muted small" id="planHint"></span></div>
+      </div>
+      <div class="card"><div id="planList" class="plan-list"></div></div>
+    </section>
+
+    <!-- ============================== UPDATE OLD POSTS -->
+    <section class="page" id="page-update">
+      <header class="page-head">
+        <div><h1>Update Old Posts</h1><p class="muted">Google likes fresh content. Find what changed since a post was written and update it.</p></div>
+      </header>
+      <div class="grid update-grid">
+        <div class="card">
+          <div class="row gap"><input id="postSearch" placeholder="Search your posts"><button class="btn" id="postSearchBtn"><i data-icon="search"></i>Search</button></div>
+          <div id="postList" class="list mt"></div>
+        </div>
+        <div class="card" id="updateCard">
+          <div class="empty" id="updateEmpty"><i data-icon="refresh"></i><p>Pick a post on the left. The app searches Google for what changed and suggests edits. Nothing changes on your site until you click <b>Apply</b>.</p></div>
+          <div id="updateBody" class="hidden">
+            <div class="card-head"><h2 id="updTitle"></h2><a class="link small" id="updLink" target="_blank" rel="noopener">View post ↗</a></div>
+            <h3 class="sub">What's new</h3><ul id="updSummary" class="tips"></ul>
+            <h3 class="sub">Changes applied in the preview</h3><ul id="updChanges" class="checks"></ul>
+            <label class="lbl">New meta description <span class="muted">(optional)</span></label><textarea id="updMeta" rows="2"></textarea>
+            <div class="tabs mt" id="updTabs"><button class="tab active" data-tab="pv">Preview</button><button class="tab" data-tab="code">Edit HTML</button></div>
+            <div class="tab-pane" data-pane="pv"><iframe id="updFrame" sandbox="" title="Updated post preview"></iframe></div>
+            <div class="tab-pane hidden" data-pane="code"><textarea id="updHtml" class="code" spellcheck="false"></textarea></div>
+            <div class="row gap mt"><button class="btn primary big" id="updApplyBtn"><i data-icon="upload"></i>Apply update to the post</button>
+              <span class="muted small">WordPress keeps the old version under Revisions.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== SETTINGS -->
+    <section class="page" id="page-settings">
+      <header class="page-head">
+        <div><h1>Settings</h1><p class="muted">Saved only on this computer. Keys are never shown again after saving.</p></div>
+        <button class="btn primary" id="saveSettingsBtn"><i data-icon="save"></i>Save settings</button>
+      </header>
+
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="grid"></i>Your sites</h2><span class="muted small">Each site has its own niche, WordPress login and settings. API keys are shared.</span></div>
+        <div class="row gap wrap">
+          <span>Now editing: <b id="curSite"></b></span>
+          <button class="btn small" id="renameSiteBtn"><i data-icon="pen"></i>Rename</button>
+          <button class="btn small" id="newSiteBtn"><i data-icon="plus"></i>Add site</button>
+          <button class="btn small ghost" id="delSiteBtn"><i data-icon="trash"></i>Delete this site</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="target"></i>1. Your blog & niche</h2></div>
+        <div class="chips" id="settingsNiches"></div>
+        <div id="presetBox" class="preset hidden"></div>
+        <div class="form-grid">
+          <div><label class="lbl">Extra niche detail <span class="muted">(optional)</span></label><input data-k="niche_custom" placeholder="e.g. budget Android phones and apps"></div>
+          <div><label class="lbl">Readers (audience)</label><input data-k="audience"></div>
+          <div><label class="lbl">Blog name</label><input data-k="site_name" placeholder="My Blog"></div>
+          <div><label class="lbl">Author name</label><input data-k="author_name"></div>
+          <div><label class="lbl">Author city/country <span class="muted">(optional)</span></label><input data-k="author_location" placeholder="e.g. Lahore, Pakistan"></div>
+          <div><label class="lbl">Trends country</label><select data-k="trends_geo" id="geoSettings"></select></div>
+          <div><label class="lbl">Article language</label><select data-k="language">
+            <option>English</option><option>Urdu</option><option>Hindi</option><option>Arabic</option><option>Spanish</option><option>French</option><option>German</option><option>Portuguese</option><option>Indonesian</option><option>Turkish</option></select></div>
+          <div><label class="lbl">Posts per week (limit)</label><input type="number" min="1" max="21" data-k="posts_per_week"></div>
+          <div><label class="lbl">Writing tone</label><select data-k="tone">
+            <option value="friendly">Friendly (knowledgeable friend)</option><option value="professional">Professional (expert)</option><option value="simple">Simple (for beginners)</option></select></div>
+        </div>
+        <label class="switch mt"><input type="checkbox" data-k="ai_trend_filter"><span></span>Use AI to double-check that trends fit my niche (more accurate, uses Gemini)</label>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="file"></i>2. Article</h2></div>
+        <div class="form-grid">
+          <div>
+            <label class="lbl">Article length: <b id="wordsVal"></b> words</label>
+            <input type="range" min="600" max="3000" step="100" data-k="target_words" id="wordsRange">
+            <div class="row between muted small"><span>600 short</span><span>1400 standard</span><span>3000 long guide</span></div>
+          </div>
+          <div>
+            <label class="lbl">Images inside the article</label>
+            <div class="stepper"><button class="btn small" data-step="-1">−</button><input type="number" min="0" max="6" data-k="inline_images" id="imgCount"><button class="btn small" data-step="1">+</button></div>
+            <label class="switch mt"><input type="checkbox" data-k="featured_image"><span></span>Also add a featured image</label>
+          </div>
+          <div><label class="lbl">Image source</label><select data-k="image_source">
+            <option value="pexels_then_gemini">Free photo first, AI image if none found</option>
+            <option value="pexels">Free photos only (Pexels)</option>
+            <option value="gemini">AI images only (Gemini)</option>
+            <option value="openai">AI images only (OpenAI)</option>
+            <option value="none">No images</option></select></div>
+          <div><label class="lbl">Caption under AI images</label><input data-k="ai_caption"></div>
+          <div><label class="lbl">Max internal links</label><input type="number" min="0" max="8" data-k="max_internal_links"></div>
+          <div><label class="lbl">Max external links</label><input type="number" min="0" max="8" data-k="max_external_links"></div>
+        </div>
+        <div class="row gap wrap mt">
+          <label class="switch"><input type="checkbox" data-k="faq"><span></span>FAQ section</label>
+          <label class="switch"><input type="checkbox" data-k="sources_section"><span></span>Sources list at the end</label>
+          <label class="switch"><input type="checkbox" data-k="experience_section"><span></span>Space for my own experience</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="link"></i>3. Connections & API keys</h2><a href="#guide" class="link">How to get these →</a></div>
+
+        <div class="conn">
+          <div class="conn-head"><div class="conn-title"><span class="logo wp">W</span>WordPress</div><span class="status" id="st_wp"></span></div>
+          <div class="form-grid">
+            <div><label class="lbl">Site address</label><input data-k="wp_url" placeholder="https://yourblog.com"></div>
+            <div><label class="lbl">Username</label><input data-k="wp_user" autocomplete="off"></div>
+            <div><label class="lbl">Application Password <a href="#guide-wp" class="link small">where?</a></label><input type="password" data-k="wp_app_password" autocomplete="new-password"></div>
+          </div>
+          <div class="row gap mt"><button class="btn" id="testWpBtn"><i data-icon="plug"></i>Save & test WordPress</button><span class="muted small" id="wpResult"></span></div>
+        </div>
+
+        <div class="conn">
+          <div class="conn-head"><div class="conn-title"><span class="logo gem">G</span>Google Gemini <span class="tag">required</span></div><span class="status" id="st_gem"></span></div>
+          <div class="form-grid">
+            <div><label class="lbl">Gemini API key <a href="#guide-gemini" class="link small">where?</a></label><input type="password" data-k="gemini_api_key" autocomplete="new-password"></div>
+            <div><label class="lbl">Text model</label><input data-k="text_model" list="textModels" placeholder="click Detect models"><datalist id="textModels"></datalist></div>
+            <div><label class="lbl">Image model</label><input data-k="image_model" list="imageModels" placeholder="click Detect models"><datalist id="imageModels"></datalist></div>
+          </div>
+          <div class="row gap mt wrap"><button class="btn" id="detectBtn"><i data-icon="sparkles"></i>Save & detect models</button><button class="btn" id="testImgBtn"><i data-icon="image"></i>Test AI image</button><span class="muted small" id="gemResult"></span></div>
+          <img id="testImg" class="test-img hidden" alt="Test image">
+        </div>
+
+        <div class="conn">
+          <div class="conn-head"><div class="conn-title"><span class="logo px">P</span>Pexels <span class="tag soft">free photos, optional</span></div><span class="status" id="st_px"></span></div>
+          <div class="form-grid">
+            <div><label class="lbl">Pexels API key <a href="#guide-pexels" class="link small">where?</a></label><input type="password" data-k="pexels_api_key" autocomplete="new-password"></div>
+          </div>
+          <div class="row gap mt"><button class="btn" id="testPxBtn"><i data-icon="image"></i>Save & test Pexels</button><span class="muted small" id="pxResult"></span></div>
+        </div>
+
+        <div class="conn">
+          <div class="conn-head"><div class="conn-title"><span class="logo ai">AI</span>Who writes the article <span class="tag soft">optional</span></div></div>
+          <p class="muted small">Research always uses Gemini with Google Search. The writing can use Gemini, OpenAI (ChatGPT API) or Claude.</p>
+          <div class="form-grid">
+            <div><label class="lbl">Writer</label><select data-k="writer_provider"><option value="gemini">Gemini</option><option value="openai">OpenAI (ChatGPT API)</option><option value="anthropic">Claude (Anthropic)</option></select></div>
+            <div><label class="lbl">OpenAI API key <a href="#guide-other" class="link small">where?</a></label><input type="password" data-k="openai_api_key" autocomplete="new-password"></div>
+            <div><label class="lbl">OpenAI model</label><input data-k="openai_model" list="oaModels" placeholder="click Detect"><datalist id="oaModels"></datalist></div>
+            <div><label class="lbl">OpenAI image model</label><input data-k="openai_image_model"></div>
+            <div><label class="lbl">Claude API key <a href="#guide-other" class="link small">where?</a></label><input type="password" data-k="anthropic_api_key" autocomplete="new-password"></div>
+            <div><label class="lbl">Claude model</label><input data-k="anthropic_model" list="anModels" placeholder="click Detect"><datalist id="anModels"></datalist></div>
+          </div>
+          <div class="row gap mt wrap"><button class="btn" id="detectOaBtn"><i data-icon="sparkles"></i>Save & detect OpenAI</button><button class="btn" id="detectAnBtn"><i data-icon="sparkles"></i>Save & detect Claude</button><span class="muted small" id="aiResult"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2><i data-icon="coins"></i>4. Cost estimate & updates</h2></div>
+        <p class="muted small">Optional: enter your prices (from your provider's pricing page) to see an estimated monthly cost on the Dashboard.</p>
+        <div class="form-grid">
+          <div><label class="lbl">Price per 1M input tokens (USD)</label><input type="number" step="0.01" min="0" data-k="price_in_per_m"></div>
+          <div><label class="lbl">Price per 1M output tokens (USD)</label><input type="number" step="0.01" min="0" data-k="price_out_per_m"></div>
+          <div><label class="lbl">Price per AI image (USD)</label><input type="number" step="0.001" min="0" data-k="price_image"></div>
+          <div><label class="lbl">Update check address <span class="muted">(optional)</span></label><input data-k="update_url" placeholder="https://…/latest.json"></div>
+        </div>
+        <div class="row gap mt wrap"><label class="switch"><input type="checkbox" data-k="check_updates"><span></span>Check for new versions when the app starts</label>
+          <button class="btn small" id="checkUpdBtn"><i data-icon="refresh"></i>Check now</button><span class="muted small" id="updResult"></span></div>
+      </div>
+      <div class="row end"><button class="btn primary big" id="saveSettingsBtn2"><i data-icon="save"></i>Save settings</button></div>
+    </section>
+
+    <!-- ============================== GUIDE -->
+    <section class="page" id="page-guide">
+      <header class="page-head">
+        <div><h1>Setup Guide</h1><p class="muted">One-time setup, about 10 minutes.</p></div>
+        <div class="seg" id="langSeg"><button data-lang="en" class="active">English</button><button data-lang="ur">Roman Urdu</button></div>
+      </header>
+      <div id="guideBody"></div>
+    </section>
+  </main>
+</div>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<dialog id="reportDlg" class="dlg">
+  <h2><i data-icon="alert"></i>Report a problem</h2>
+  <p class="muted small">This report has your app version, settings and recent errors. <b>Keys and passwords are removed.</b> Copy it and send it to the person who gave you the app (for example in a YouTube comment or WhatsApp).</p>
+  <textarea id="reportText" rows="14" class="code small-code" readonly></textarea>
+  <div class="row gap mt end"><button class="btn" id="reportClose">Close</button><button class="btn primary" id="reportCopy"><i data-icon="copy"></i>Copy report</button></div>
+</dialog>
+<script src="/static/icons.js"></script>
+<script src="/static/guide.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
