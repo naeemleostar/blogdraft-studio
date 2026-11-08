@@ -1,5 +1,5 @@
 {
-  "version": "3.0.2",
+  "version": "3.1",
   "url": "https://github.com/naeemleostar/blogdraft-studio/releases/latest",
-  "notes": "Update check is now on. Update Old Posts shows live progress."
+  "notes": "Folder build (fewer antivirus warnings), bug report form on GitHub."
 }

@@ -29,14 +29,16 @@ jobs:
           $v = python -c "from core import config; print(config.APP_VERSION)"
           "version=$v" >> $env:GITHUB_OUTPUT
       - name: Build exe
-        run: pyinstaller --noconfirm --clean --onefile --windowed --name "BlogDraft Studio" --icon app.ico --add-data "web;web" server.py
+        run: |
+          python tools/version_file.py
+          pyinstaller --noconfirm --clean --onedir --windowed --name "BlogDraft Studio" --icon app.ico --version-file version_info.txt --add-data "web;web" server.py
       - name: Package
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force release/BlogDraft-Studio | Out-Null
-          Copy-Item "dist/BlogDraft Studio.exe" release/BlogDraft-Studio/
+          Copy-Item -Recurse "dist/BlogDraft Studio/*" release/BlogDraft-Studio/
           Copy-Item -Recurse wp-plugin release/BlogDraft-Studio/
-          Copy-Item README.md release/BlogDraft-Studio/
+          Copy-Item README.md, LICENSE, "HOW TO START.txt" release/BlogDraft-Studio/
           Compress-Archive -Path release/BlogDraft-Studio/* -DestinationPath release/BlogDraft-Studio-Windows.zip -Force
       - uses: actions/upload-artifact@v4
         with:
@@ -51,5 +53,12 @@ jobs:
           files: release/BlogDraft-Studio-Windows.zip
           overwrite_files: true
           body: |
-            Download **BlogDraft-Studio-Windows.zip**, extract it and double-click **BlogDraft Studio.exe**.
+            1. Download **BlogDraft-Studio-Windows.zip** and **extract all** (right-click → Extract All). Don't run it from inside the zip.
+            2. Open the folder and double-click **BlogDraft Studio.exe**.
+            3. If Windows shows "Windows protected your PC": click **More info** → **Run anyway**. The app is open source and not code-signed yet.
+
             The WordPress plugin is in the `wp-plugin` folder. Setup help is inside the app (Setup Guide).
+
+            ---
+            **Urdu:** zip download karein, right-click → Extract All. Folder mein **BlogDraft Studio.exe** chalayein.
+            "Windows protected your PC" aaye to **More info** → **Run anyway** dabayein.

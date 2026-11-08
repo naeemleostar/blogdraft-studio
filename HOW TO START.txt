@@ -1,0 +1,18 @@
+BlogDraft Studio - HOW TO START
+
+1. Make sure you EXTRACTED the zip (right-click the zip > Extract All). Do not run it from inside the zip.
+2. Double-click "BlogDraft Studio.exe". The app opens in your web browser.
+3. If Windows says "Windows protected your PC": click "More info", then "Run anyway".
+   (The app is free and open source but not code-signed yet, so Windows does not know it.)
+4. Follow the setup steps in the app (Setup Guide).
+5. To close the app: click "Quit app" at the bottom left.
+
+Problems? In the app click "Report a problem".
+Source code: https://github.com/naeemleostar/blogdraft-studio
+
+--- Roman Urdu ---
+1. Pehle zip ko EXTRACT karein (right-click > Extract All). Zip ke andar se na chalayein.
+2. "BlogDraft Studio.exe" par double-click karein. App browser mein khulegi.
+3. "Windows protected your PC" aaye to "More info" phir "Run anyway" dabayein.
+4. App mein Setup Guide ke steps follow karein.
+5. Band karne ke liye neeche left "Quit app" dabayein.

@@ -6,7 +6,9 @@ const GUIDE = {
       adds images and saves it in your WordPress as a <b>Draft</b>. Nothing is published automatically:
       you read it, add your own touch and click Publish yourself.</p>
       <p>You need three things: your <b>WordPress Application Password</b>, a <b>Gemini API key</b> (free to start)
-      and, optionally, a <b>Pexels API key</b> for free photos. All keys stay on your computer.</p>` },
+      and, optionally, a <b>Pexels API key</b> for free photos. All keys stay on your computer.</p>
+      <div class="callout info"><b>"Windows protected your PC"?</b> Click <b>More info</b> → <b>Run anyway</b>. The app is free and
+      open source (github.com/naeemleostar/blogdraft-studio) but not code-signed yet, so Windows doesn't recognise it.</div>` },
 
     { id: 'guide-wp', title: 'WordPress Application Password', html: `
       <ol>
@@ -105,7 +107,9 @@ const GUIDE = {
       tasveerein lagati hai aur WordPress mein <b>Draft</b> bana deti hai. Khud kuch publish nahi hota: aap padhte hain,
       apna tajurba jodte hain aur <b>Publish</b> khud dabate hain.</p>
       <p>Teen cheezein chahiye: <b>WordPress Application Password</b>, <b>Gemini API key</b> (shuru mein free) aur
-      (optional) free photos ke liye <b>Pexels API key</b>. Saari keys sirf aap ke computer par rehti hain.</p>` },
+      (optional) free photos ke liye <b>Pexels API key</b>. Saari keys sirf aap ke computer par rehti hain.</p>
+      <div class="callout info"><b>"Windows protected your PC" aaya?</b> <b>More info</b> → <b>Run anyway</b> dabayein. App free aur
+      open source hai (github.com/naeemleostar/blogdraft-studio), bas abhi code-signed nahi, is liye Windows usay nahi pehchanta.</div>` },
 
     { id: 'guide-wp', title: 'WordPress Application Password', html: `
       <ol>

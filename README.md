@@ -6,7 +6,16 @@ experience and click **Publish** yourself.
 
 It runs on your own computer and opens in your browser as a dashboard. Your keys stay on your computer.
 
-## Start
+## Download (Windows, no Python needed)
+
+1. Get **BlogDraft-Studio-Windows.zip** from the [latest release](https://github.com/naeemleostar/blogdraft-studio/releases/latest).
+2. Right-click the zip → **Extract All**. Open the folder and double-click **BlogDraft Studio.exe**.
+3. If Windows shows **"Windows protected your PC"**: click **More info** → **Run anyway**
+   (the app is open source but not code-signed yet).
+
+Problems? Click **Report a problem** in the app, or [open a bug report](https://github.com/naeemleostar/blogdraft-studio/issues/new?template=bug_report.yml).
+
+## Start from the source code
 
 **Windows:** double-click **`Start BlogDraft Studio (Windows).bat`**.
 The first start takes a minute (it sets things up). If Python is missing, the file opens the download page:
@@ -76,3 +85,7 @@ unedited AI content breaks Google's spam policies and AdSense rules.
 - Settings: `%USERPROFILE%\.blogdraft_studio\config.json` (Windows) or `~/.blogdraft_studio/config.json`
 - Drafts: the `drafts` folder next to it
 - Tests: `python -m unittest discover tests`
+
+## License
+
+MIT — free to use, share and change. See [LICENSE](LICENSE).

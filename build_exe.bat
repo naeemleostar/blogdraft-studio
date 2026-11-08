@@ -11,17 +11,20 @@ if not exist ".buildenv\Scripts\python.exe" %PY% -m venv .buildenv
 ".buildenv\Scripts\python.exe" -m pip install -q --upgrade pip
 ".buildenv\Scripts\python.exe" -m pip install -q -r requirements.txt pyinstaller || (echo Install failed. & pause & exit /b 1)
 
-".buildenv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --onefile --windowed ^
-  --name "BlogDraft Studio" --icon app.ico ^
+".buildenv\Scripts\python.exe" tools\version_file.py
+".buildenv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --onedir --windowed ^
+  --name "BlogDraft Studio" --icon app.ico --version-file version_info.txt ^
   --add-data "web;web" ^
   server.py || (echo Build failed. & pause & exit /b 1)
 
 rem Package: exe + WordPress plugin + readme
 if exist release rmdir /s /q release
 mkdir release\BlogDraft-Studio
-copy "dist\BlogDraft Studio.exe" release\BlogDraft-Studio\ >nul
+xcopy "dist\BlogDraft Studio" release\BlogDraft-Studio\ /e /i /q >nul
 xcopy wp-plugin release\BlogDraft-Studio\wp-plugin\ /e /i /q >nul
 copy README.md release\BlogDraft-Studio\ >nul
+copy LICENSE release\BlogDraft-Studio\ >nul
+copy "HOW TO START.txt" release\BlogDraft-Studio\ >nul
 powershell -NoProfile -Command "Compress-Archive -Path 'release\BlogDraft-Studio\*' -DestinationPath 'release\BlogDraft-Studio-Windows.zip' -Force"
 echo.
 echo Done: release\BlogDraft-Studio-Windows.zip

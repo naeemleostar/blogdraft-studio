@@ -16,7 +16,7 @@ const COUNTRIES = [['US', 'United States'], ['GB', 'United Kingdom'], ['CA', 'Ca
   ['BR', 'Brazil'], ['MX', 'Mexico'], ['JP', 'Japan'], ['KR', 'South Korea'], ['TR', 'Turkey'], ['BD', 'Bangladesh']];
 const IMAGE_SOURCES = { pexels_then_gemini: 'free photo first, then AI', pexels: 'free photos', gemini: 'AI images', openai: 'OpenAI images', none: 'no images' };
 
-const UI_VERSION = '3.0.2';
+const UI_VERSION = '3.1';
 const S = { cfg: {}, niches: [], article: store.get('article', null), trends: [], news: [], newsTopic: '', wpOk: null, planId: '', usage: null, updChecked: false };
 
 /* ------------------------------------------------------------------ API */
@@ -969,10 +969,19 @@ function wire() {
 
   // report
   $('#reportBtn').addEventListener('click', async () => {
-    try { $('#reportText').value = (await api('report', {})).text; } catch (err) { $('#reportText').value = 'Could not create the report: ' + err.message; }
+    try {
+      const rp = await api('report', {});
+      $('#reportText').value = rp.text;
+      const gh = $('#reportGh');
+      gh.classList.toggle('hidden', !rp.issue_url);
+      gh.href = rp.issue_url || '#';
+    } catch (err) { $('#reportText').value = 'Could not create the report: ' + err.message; }
     $('#reportDlg').showModal();
   });
   $('#reportClose').addEventListener('click', () => $('#reportDlg').close());
+  $('#reportGh').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#reportText').value); toast('Report copied — paste it into the form'); } catch (err) { /* user can copy manually */ }
+  });
   $('#reportCopy').addEventListener('click', async () => {
     const t = $('#reportText');
     try { await navigator.clipboard.writeText(t.value); toast('Report copied'); } catch (err) { t.select(); document.execCommand('copy'); toast('Report copied'); }

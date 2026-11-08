@@ -548,7 +548,9 @@ def api_plan(body):
 
 
 def api_report(_body):
-    return {"text": system.problem_report(cfg(), JOBS)}
+    return {"text": system.problem_report(cfg(), JOBS), "version": config.APP_VERSION,
+            "issue_url": f"https://github.com/{config.GITHUB_REPO}/issues/new?template=bug_report.yml"
+                         f"&version={config.APP_VERSION}" if config.GITHUB_REPO else ""}
 
 
 def api_seo(body):
