@@ -16,7 +16,7 @@ const COUNTRIES = [['US', 'United States'], ['GB', 'United Kingdom'], ['CA', 'Ca
   ['BR', 'Brazil'], ['MX', 'Mexico'], ['JP', 'Japan'], ['KR', 'South Korea'], ['TR', 'Turkey'], ['BD', 'Bangladesh']];
 const IMAGE_SOURCES = { pexels_then_gemini: 'free photo first, then AI', pexels: 'free photos', gemini: 'AI images', openai: 'OpenAI images', none: 'no images' };
 
-const UI_VERSION = '3.1';
+const UI_VERSION = '3.2';
 const S = { cfg: {}, niches: [], article: store.get('article', null), trends: [], news: [], newsTopic: '', wpOk: null, planId: '', usage: null, updChecked: false };
 
 /* ------------------------------------------------------------------ API */
@@ -59,7 +59,7 @@ async function busy(btn, fn) {
 function toast(msg, kind) {
   const el = document.createElement('div');
   el.className = 'toast ' + (kind || 'ok');
-  el.innerHTML = `<i data-icon="${kind === 'err' ? 'alert' : 'check'}"></i><div>${esc(msg)}</div>`;
+  el.innerHTML = `<i data-icon="${kind === 'err' ? 'alert' : 'check'}"></i><div>${esc(t(msg))}</div>`;
   $('#toasts').appendChild(el);
   paintIcons(el);
   setTimeout(() => el.remove(), kind === 'err' ? 8000 : 4000);
@@ -109,6 +109,7 @@ function route() {
   if (page === 'topics') renderChips($('#topicNiches'), saveNichesQuick);
   if (page === 'settings') fillSettings();
   if (page === 'calendar') loadPlan();
+  if (page === 'wizard') wizardOpen();
   if (page === 'update' && !$('#postList').children.length) searchPosts();
   if (page === 'guide') { renderGuide(); if (hash !== 'guide') setTimeout(() => { const el = document.getElementById(hash); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 50); }
   window.scrollTo(0, 0);
@@ -633,6 +634,7 @@ function fillSettings() {
   st('#st_gem', c.gemini_api_key_set, c.text_model ? 'Key saved · ' + c.text_model : 'Key saved');
   st('#st_px', c.pexels_api_key_set, 'Key saved');
   $('#curSite').textContent = c.profile;
+  $$('#uiLangSeg button').forEach((b) => b.classList.toggle('active', b.dataset.lang === UI_LANG));
 }
 
 function settingsNichesChanged() { renderChips($('#settingsNiches'), settingsNichesChanged); renderPreset(); }
@@ -674,6 +676,57 @@ async function saveSettings(quiet) {
   fillSettings();
   updatePill();
   if (!quiet) toast('Settings saved');
+}
+
+/* ------------------------------------------------------------------ setup wizard */
+const WZ = { step: 1, img: '' };
+
+function wizardOpen() {
+  store.set('wizardSeen', true);
+  const c = S.cfg;
+  WZ.img = c.image_source;
+  $('#wz_site_name').value = c.site_name || '';
+  $('#wz_author_name').value = c.author_name || '';
+  geoOptions($('#wz_geo'), c.trends_geo);
+  $('#wz_language').value = c.language || 'English';
+  $('#wz_wp_url').value = c.wp_url || '';
+  $('#wz_wp_user').value = c.wp_user || '';
+  $('#wz_saver').checked = !!c.saver_mode;
+  ['wp_app_password', 'gemini_api_key', 'pexels_api_key'].forEach((k) => {
+    $('#wz_' + k).placeholder = c[k + '_set'] ? `Saved ${(c[k + '_hint'] || '').replace('…', '••••')} (type to replace)` : 'Paste here';
+  });
+  const wzNiches = () => renderChips($('#wzNiches'), wzNiches);
+  wzNiches();
+  wizardStep(c.gemini_api_key_set && c.wp_app_password_set ? 2 : 1);
+}
+
+function wizardStep(n) {
+  WZ.step = Math.max(1, Math.min(6, n));
+  $$('.wz-pane').forEach((p) => p.classList.toggle('hidden', +p.dataset.wp !== WZ.step));
+  $$('#wzSteps > div').forEach((d) => { const k = +d.dataset.w; d.className = k < WZ.step ? 'ok' : k === WZ.step ? 'on' : ''; });
+  $('#wzBack').classList.toggle('hidden', WZ.step === 1 || WZ.step === 6);
+  $('#wzNext').classList.toggle('hidden', WZ.step === 6);
+  $('#wzNext').textContent = WZ.step === 5 ? t('Finish') : t('Next →');
+  const lang = store.get('uiLang', 'en');
+  $$('[data-wp="1"] .wz-choice').forEach((b) => b.classList.toggle('on', b.dataset.lang === lang));
+  $$('[data-wp="5"] .wz-choice').forEach((b) => b.classList.toggle('on', b.dataset.img === WZ.img));
+  $('#wzPexels').classList.toggle('hidden', !['pexels', 'pexels_then_gemini'].includes(WZ.img));
+}
+
+async function wizardSave() {
+  const body = { niches: S.cfg.niches, saver_mode: $('#wz_saver').checked };
+  if (WZ.step === 2) Object.assign(body, { site_name: $('#wz_site_name').value, author_name: $('#wz_author_name').value,
+    trends_geo: $('#wz_geo').value, language: $('#wz_language').value });
+  if (WZ.step === 3) Object.assign(body, { wp_url: $('#wz_wp_url').value, wp_user: $('#wz_wp_user').value, wp_app_password: $('#wz_wp_app_password').value });
+  if (WZ.step === 4) body.gemini_api_key = $('#wz_gemini_api_key').value;
+  if (WZ.step === 5) Object.assign(body, { image_source: WZ.img || S.cfg.image_source, pexels_api_key: $('#wz_pexels_api_key').value });
+  if (WZ.step === 2) {
+    const first = S.niches.find((n) => S.cfg.niches.includes(n.id));
+    if (first && first.preset) Object.assign(body, first.preset, WZ.img ? {} : {});
+  }
+  const st = await api('config', body);
+  S.cfg = st.config;
+  ['#wz_wp_app_password', '#wz_gemini_api_key', '#wz_pexels_api_key'].forEach((id) => { $(id).value = ''; });
 }
 
 /* ------------------------------------------------------------------ guide */
@@ -987,6 +1040,45 @@ function wire() {
     try { await navigator.clipboard.writeText(t.value); toast('Report copied'); } catch (err) { t.select(); document.execCommand('copy'); toast('Report copied'); }
   });
 
+  // wizard
+  $$('[data-wp="1"] .wz-choice').forEach((b) => b.addEventListener('click', () => setUiLang(b.dataset.lang)));
+  $$('[data-wp="5"] .wz-choice').forEach((b) => b.addEventListener('click', () => { WZ.img = b.dataset.img; wizardStep(5); }));
+  $('#wzBack').addEventListener('click', () => wizardStep(WZ.step - 1));
+  $('#wzNext').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    if (WZ.step === 2 && !S.cfg.niches.length) { toast(t('Tick at least one niche.'), 'err'); return; }
+    if (WZ.step > 1) await wizardSave();
+    if (WZ.step === 4 && S.cfg.gemini_api_key_set && !S.cfg.text_model) {
+      try { await runJob('detect_models', {}, { quiet: true }); await loadState(); } catch (err) { toast(err.message, 'err'); return; }
+    }
+    wizardStep(WZ.step + 1);
+  }));
+  $('#wzTestWp').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    await wizardSave();
+    $('#wzWpRes').textContent = t('Testing…');
+    try {
+      const r = await runJob('test_wordpress', {}, { quiet: true });
+      S.wpOk = true;
+      $('#wzWpRes').innerHTML = `<span class="status ok">✓ ${esc(r.user)} · ${r.posts} posts</span>`;
+    } catch (err) { S.wpOk = false; $('#wzWpRes').innerHTML = `<span class="status" style="color:var(--red)">✗ ${esc(err.message)}</span>`; }
+    updatePill();
+  }));
+  $('#wzDetect').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    await wizardSave();
+    try {
+      const r = await runJob('detect_models', {}, { quiet: true });
+      await loadState();
+      $('#wzGemRes').innerHTML = `<span class="status ok">✓ ${esc(r.text_model)}</span>`;
+    } catch (err) { $('#wzGemRes').innerHTML = `<span class="status" style="color:var(--red)">✗ ${esc(err.message)}</span>`; }
+  }));
+  $('#wzTestPx').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    await wizardSave();
+    try {
+      await runJob('test_pexels', {}, { quiet: true });
+      $('#wzPxRes').innerHTML = '<span class="status ok">✓ Pexels OK</span>';
+    } catch (err) { $('#wzPxRes').innerHTML = `<span class="status" style="color:var(--red)">✗ ${esc(err.message)}</span>`; }
+  }));
+  $$('#uiLangSeg button').forEach((b) => b.addEventListener('click', () => setUiLang(b.dataset.lang)));
+
   // guide + quit
   $$('#langSeg button').forEach((b) => b.addEventListener('click', () => { store.set('lang', b.dataset.lang); renderGuide(); }));
   $('#quitBtn').addEventListener('click', async () => {
@@ -1001,5 +1093,6 @@ function wire() {
   try { await loadState(); } catch (e) { toast('Could not reach the app: ' + e.message, 'err'); return; }
   wire();
   if (S.article) showArticle(); else setStep(1);
+  if (!S.cfg.gemini_api_key_set && !S.cfg.wp_app_password_set && !store.get('wizardSeen', false)) location.hash = '#wizard';
   route();
 })();

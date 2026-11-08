@@ -44,7 +44,8 @@
     <section class="page" id="page-dashboard">
       <header class="page-head">
         <div><h1>Welcome back</h1><p class="muted">Find a topic, write a researched draft, check it, save it to WordPress.</p></div>
-        <a class="btn primary" href="#write"><i data-icon="pen"></i>Write a post</a>
+        <div class="row gap"><a class="btn" href="#wizard"><i data-icon="sparkles"></i>Setup wizard</a>
+          <a class="btn primary" href="#write"><i data-icon="pen"></i>Write a post</a></div>
       </header>
 
       <div id="updateBanner" class="update-banner hidden"></div>
@@ -85,6 +86,89 @@
       <div class="card">
         <div class="card-head"><h2><i data-icon="target"></i>Your niche</h2><a href="#settings" class="link">Change →</a></div>
         <div id="statNiche" class="muted"></div>
+      </div>
+    </section>
+
+    <!-- ============================== WIZARD -->
+    <section class="page" id="page-wizard">
+      <header class="page-head">
+        <div><h1>Setup wizard</h1><p class="muted">Five short steps. You can change everything later in Settings.</p></div>
+        <a class="btn ghost" href="#dashboard" id="wzSkip">Skip for now</a>
+      </header>
+      <div class="wz-steps" id="wzSteps">
+        <div data-w="1"><span>1</span>Language</div><div data-w="2"><span>2</span>Your niche</div><div data-w="3"><span>3</span>WordPress</div>
+        <div data-w="4"><span>4</span>Gemini key</div><div data-w="5"><span>5</span>Images</div><div data-w="6"><span>✓</span>Done</div>
+      </div>
+      <div class="card wz-card">
+        <div class="wz-pane" data-wp="1">
+          <h2>Which language do you want for the app?</h2>
+          <p class="muted">This changes the buttons and menus. Articles are written in the language you choose in step 2.</p>
+          <div class="wz-choices">
+            <button class="wz-choice" data-lang="en"><b>English</b><span>Buttons and menus in English</span></button>
+            <button class="wz-choice" data-lang="ur"><b>Roman Urdu</b><span>Buttons aur menu Roman Urdu mein</span></button>
+          </div>
+        </div>
+        <div class="wz-pane hidden" data-wp="2">
+          <h2>What is your blog about?</h2>
+          <p class="muted">Tick one or more. The app finds topics and writes only for these.</p>
+          <div class="chips" id="wzNiches"></div>
+          <div class="form-grid mt">
+            <div><label class="lbl">Blog name</label><input id="wz_site_name" placeholder="My Blog"></div>
+            <div><label class="lbl">Your name</label><input id="wz_author_name"></div>
+            <div><label class="lbl">Readers' country</label><select id="wz_geo"></select></div>
+            <div><label class="lbl">Article language</label><select id="wz_language"><option>English</option><option>Urdu</option><option>Hindi</option><option>Arabic</option><option>Spanish</option><option>French</option><option>German</option><option>Portuguese</option><option>Indonesian</option><option>Turkish</option></select></div>
+          </div>
+        </div>
+        <div class="wz-pane hidden" data-wp="3">
+          <h2>Connect your WordPress site</h2>
+          <ol class="wz-how">
+            <li>Open <b>yourblog.com/wp-admin</b> → <b>Users → Profile</b>.</li>
+            <li>At the bottom, under <b>Application Passwords</b>, type <code>BlogDraft Studio</code> → <b>Add New Application Password</b>.</li>
+            <li>Copy the password and paste it below. <a class="link" href="#guide-wp">More help</a></li>
+          </ol>
+          <div class="form-grid">
+            <div><label class="lbl">Site address</label><input id="wz_wp_url" placeholder="https://yourblog.com"></div>
+            <div><label class="lbl">WordPress username</label><input id="wz_wp_user" autocomplete="off"></div>
+            <div><label class="lbl">Application Password</label><input id="wz_wp_app_password" type="password" autocomplete="new-password"></div>
+          </div>
+          <div class="row gap mt"><button class="btn" id="wzTestWp"><i data-icon="plug"></i>Test connection</button><span class="small" id="wzWpRes"></span></div>
+        </div>
+        <div class="wz-pane hidden" data-wp="4">
+          <h2>Add your Gemini API key</h2>
+          <ol class="wz-how">
+            <li>Open <a class="link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with Google.</li>
+            <li>Click <b>Create API key</b> and copy it.</li>
+            <li>Paste it below and click <b>Check key</b>. Writing works on the free plan.</li>
+          </ol>
+          <div class="form-grid"><div><label class="lbl">Gemini API key</label><input id="wz_gemini_api_key" type="password" autocomplete="new-password"></div></div>
+          <label class="switch mt"><input type="checkbox" id="wz_saver"><span></span>Saver mode: fewer AI requests (best for the free plan)</label>
+          <div class="row gap mt"><button class="btn" id="wzDetect"><i data-icon="sparkles"></i>Check key</button><span class="small" id="wzGemRes"></span></div>
+        </div>
+        <div class="wz-pane hidden" data-wp="5">
+          <h2>Pictures for your posts</h2>
+          <div class="wz-choices">
+            <button class="wz-choice" data-img="pexels"><b>Free photos (Pexels)</b><span>Free. Needs a free Pexels key.</span></button>
+            <button class="wz-choice" data-img="pexels_then_gemini"><b>Free photo, else AI image</b><span>AI images need Gemini billing.</span></button>
+            <button class="wz-choice" data-img="gemini"><b>AI images (Gemini)</b><span>Needs billing in Google AI Studio.</span></button>
+            <button class="wz-choice" data-img="none"><b>No images</b><span>Add your own photos per post.</span></button>
+          </div>
+          <div id="wzPexels" class="mt">
+            <p class="muted small">Get a free key at <a class="link" href="https://www.pexels.com/api/" target="_blank" rel="noopener">pexels.com/api</a> → Your API Key.</p>
+            <div class="form-grid"><div><label class="lbl">Pexels API key</label><input id="wz_pexels_api_key" type="password" autocomplete="new-password"></div></div>
+            <div class="row gap mt"><button class="btn" id="wzTestPx"><i data-icon="image"></i>Test Pexels</button><span class="small" id="wzPxRes"></span></div>
+          </div>
+        </div>
+        <div class="wz-pane hidden" data-wp="6">
+          <div class="empty"><i data-icon="check"></i>
+            <h2>You're ready!</h2>
+            <p>Next: find a topic in your niche and write your first draft.</p>
+            <div class="row gap wrap" style="justify-content:center;margin-top:14px"><a class="btn primary big" href="#topics"><i data-icon="search"></i>Find my first topic</a><a class="btn" href="#dashboard">Go to Dashboard</a></div>
+          </div>
+        </div>
+        <div class="row between mt wz-nav">
+          <button class="btn ghost" id="wzBack">← Back</button>
+          <button class="btn primary" id="wzNext">Next →</button>
+        </div>
       </div>
     </section>
 
@@ -342,6 +426,9 @@
             <option value="friendly">Friendly (knowledgeable friend)</option><option value="professional">Professional (expert)</option><option value="simple">Simple (for beginners)</option></select></div>
         </div>
         <label class="switch mt"><input type="checkbox" data-k="ai_trend_filter"><span></span>Use AI to double-check that trends fit my niche (more accurate, uses Gemini)</label>
+        <label class="switch mt"><input type="checkbox" data-k="saver_mode"><span></span>Saver mode: fewer AI requests (no AI trend check, free photos only, max 1 image) — best for the free Gemini plan</label>
+        <div class="row gap mt"><span class="lbl" style="margin:0">App language</span>
+          <div class="seg" id="uiLangSeg"><button data-lang="en">English</button><button data-lang="ur">Roman Urdu</button></div></div>
       </div>
 
       <div class="card">
@@ -457,6 +544,7 @@
 </dialog>
 <script src="/static/icons.js"></script>
 <script src="/static/guide.js"></script>
+<script src="/static/i18n.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

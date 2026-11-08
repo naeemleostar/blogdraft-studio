@@ -41,7 +41,39 @@ class UserError(Exception):
 
 
 def cfg() -> dict:
-    return STATE["cfg"]
+    """Settings in effect. Saver mode trims the AI work so free Gemini limits last longer."""
+    c = STATE["cfg"]
+    if not c.get("saver_mode"):
+        return c
+    c = dict(c)
+    c["ai_trend_filter"] = False
+    c["inline_images"] = min(1, int(c.get("inline_images", 1) or 0))
+    if c.get("image_source") in ("gemini", "pexels_then_gemini", "openai"):
+        c["image_source"] = "pexels" if c.get("pexels_api_key") else "none"
+    return c
+
+
+def friendly(err: str) -> str:
+    """Turn common API errors into advice a non-technical user can act on."""
+    e = err or ""
+    low = e.lower()
+    if "quota" in low or "429" in e or "resource_exhausted" in low or "rate limit" in low:
+        return ("The AI service's limit is used up for now. Free Gemini keys have a per-minute and a daily limit: "
+                "wait a minute and try again, or try tomorrow. Turning on Saver mode (Settings) uses fewer requests; "
+                "turning on billing in Google AI Studio removes most limits.\n\nDetails: " + e[:300])
+    if "api key not valid" in low or "api_key_invalid" in low or ("400" in e and "key" in low):
+        return "The Gemini API key is not valid. Create a new key at aistudio.google.com/apikey and paste it in Settings."
+    if "401" in e and "wordpress" in low:
+        return ("WordPress rejected the login. Check the username and create a new Application Password "
+                "(Users → Profile → Application Passwords).\n\nDetails: " + e[:200])
+    if "403" in e and "wordpress" in low:
+        return ("WordPress (or a security plugin / firewall) blocked the app. Allow the REST API (/wp-json/) in your "
+                "security plugin or hosting firewall.\n\nDetails: " + e[:200])
+    if "connectionerror" in low or "max retries exceeded" in low or "name or service not known" in low or "getaddrinfo" in low:
+        return "Could not reach the internet service. Check your internet connection or VPN and try again."
+    if "not found" in low and "model" in low:
+        return "This AI model is no longer available. Go to Settings and click 'Save & detect models'."
+    return e
 
 
 def need(*keys):
@@ -109,7 +141,7 @@ def run_job(label: str, fn) -> str:
             job["status"] = "error"
             system.log.info("%s: %s", label, e)
         except Exception as e:  # noqa: BLE001
-            job["error"] = f"{type(e).__name__}: {e}"
+            job["error"] = friendly(f"{type(e).__name__}: {e}")
             job["status"] = "error"
             log(traceback.format_exc(limit=3))
             system.log.error("%s failed: %s\n%s", label, e, traceback.format_exc(limit=5))
@@ -127,9 +159,9 @@ def site_domain() -> str:
 # ----------------------------------------------------------------------------- API actions
 
 def api_state(_body):
-    return {"app": config.APP_NAME, "version": config.APP_VERSION, "config": config.public(cfg()),
+    return {"app": config.APP_NAME, "version": config.APP_VERSION, "config": config.public(STATE["cfg"]),
             "niches": niches.public_list(), "drafts_dir": str(config.DRAFTS_DIR),
-            "usage": system.usage_summary(cfg())}
+            "usage": system.usage_summary(STATE["cfg"])}
 
 
 def _reload(new_cfg: dict) -> dict:
@@ -160,7 +192,7 @@ def api_profile(body):
 
 
 def api_save_config(body):
-    c = dict(cfg())
+    c = dict(STATE["cfg"])
     for k, default in config.DEFAULTS.items():
         if k not in body:
             continue

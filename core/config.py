@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "BlogDraft Studio"
-APP_VERSION = "3.1"
+APP_VERSION = "3.2"
 # Where the app looks for a newer version: a small JSON file {"version": "3.1", "url": "...", "notes": "..."}.
 # Put the address of your own file here (for example a GitHub raw link) before sharing the app.
 GITHUB_REPO = "naeemleostar/blogdraft-studio"
@@ -58,6 +58,7 @@ PROFILE_DEFAULTS = {
     "trends_geo": "US",
     "ai_trend_filter": True,    # ask Gemini to double-check which trends fit the niche
     "posts_per_week": 3,        # the app warns above this
+    "saver_mode": False,        # fewer AI calls: no AI trend filter, free photos only, max 1 inline image
     # Article
     "target_words": 1400,
     "inline_images": 2,         # images inside the article, besides the featured image

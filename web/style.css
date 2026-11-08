@@ -323,3 +323,21 @@ textarea.small-code { height: auto; font-size: 12.5px; }
 .upd-wait { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .big-spin { width: 28px; height: 28px; border: 3px solid var(--brand); border-right-color: transparent; border-radius: 50%; display: inline-block; animation: spin .8s linear infinite; }
 .upd-log { width: 100%; max-height: 180px; text-align: left; }
+
+/* ---------- wizard */
+.wz-steps { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.wz-steps > div { display: flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px; background: #fff;
+  border: 1px solid var(--line); color: var(--muted); font-weight: 600; font-size: 13px; }
+.wz-steps span { width: 22px; height: 22px; border-radius: 50%; background: var(--line-2); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+.wz-steps .on { color: var(--brand-2); border-color: var(--brand); } .wz-steps .on span { background: var(--brand); color: #fff; }
+.wz-steps .ok { color: var(--green); } .wz-steps .ok span { background: var(--green-soft); color: var(--green); }
+.wz-card { max-width: 860px; }
+.wz-card h2 { font-size: 20px; margin-bottom: 6px; }
+.wz-choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 14px; }
+.wz-choice { text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 14px; padding: 16px; cursor: pointer; font: inherit;
+  display: flex; flex-direction: column; gap: 4px; transition: border-color .12s, background .12s; }
+.wz-choice:hover { border-color: #c7cdf9; } .wz-choice.on { border-color: var(--brand); background: var(--brand-soft); }
+.wz-choice b { font-size: 15px; } .wz-choice span { color: var(--muted); font-size: 13px; }
+.wz-how { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--ink-2); }
+.wz-nav { border-top: 1px solid var(--line-2); padding-top: 16px; margin-top: 22px; }
+.empty h2 { justify-content: center; font-size: 22px; margin-top: 10px; }

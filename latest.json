@@ -1,5 +1,5 @@
 {
-  "version": "3.1",
+  "version": "3.2",
   "url": "https://github.com/naeemleostar/blogdraft-studio/releases/latest",
-  "notes": "Folder build (fewer antivirus warnings), bug report form on GitHub."
+  "notes": "Setup wizard, app in Roman Urdu, Saver mode for the free Gemini plan, clearer error messages."
 }
