@@ -16,7 +16,7 @@ const COUNTRIES = [['US', 'United States'], ['GB', 'United Kingdom'], ['CA', 'Ca
   ['BR', 'Brazil'], ['MX', 'Mexico'], ['JP', 'Japan'], ['KR', 'South Korea'], ['TR', 'Turkey'], ['BD', 'Bangladesh']];
 const IMAGE_SOURCES = { pexels_then_gemini: 'free photo first, then AI', pexels: 'free photos', gemini: 'AI images', openai: 'OpenAI images', none: 'no images' };
 
-const UI_VERSION = '3.0.1';
+const UI_VERSION = '3.0.2';
 const S = { cfg: {}, niches: [], article: store.get('article', null), trends: [], news: [], newsTopic: '', wpOk: null, planId: '', usage: null, updChecked: false };
 
 /* ------------------------------------------------------------------ API */

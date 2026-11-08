@@ -10,10 +10,10 @@ import sys
 from pathlib import Path
 
 APP_NAME = "BlogDraft Studio"
-APP_VERSION = "3.0.1"
+APP_VERSION = "3.0.2"
 # Where the app looks for a newer version: a small JSON file {"version": "3.1", "url": "...", "notes": "..."}.
 # Put the address of your own file here (for example a GitHub raw link) before sharing the app.
-UPDATE_URL = ""
+UPDATE_URL = "https://raw.githubusercontent.com/naeemleostar/blogdraft-studio/main/latest.json"
 
 CONFIG_DIR = Path(os.environ.get("BLOGDRAFT_HOME", Path.home() / ".blogdraft_studio"))
 CONFIG_FILE = CONFIG_DIR / "config.json"
